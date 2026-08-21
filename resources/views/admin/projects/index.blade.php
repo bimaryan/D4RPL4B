@@ -37,6 +37,7 @@
                     <th class="px-3 py-3">Proyek</th>
                     <th class="px-3 py-3">Tech Stack</th>
                     <th class="px-3 py-3">Tautan</th>
+                    <th class="px-3 py-3">Hosting</th>
                     <th class="px-3 py-3">ID Hash</th>
                     <th class="px-4 py-3 text-right">Aksi</th>
                 </tr>
@@ -73,6 +74,13 @@
                             @if(!$project->demo_url && !$project->repo_url)<span class="text-[#A8A29E] text-[12px]">—</span>@endif
                         </div>
                     </td>
+                    <td class="px-3 py-3">
+                        @if($project->portfolio_path)
+                            <a href="{{ $project->portfolio_url }}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-medium"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live</a>
+                        @else
+                            <span class="inline-flex px-2 py-1 rounded-full bg-[#F6F5F1] border border-[#E8DFD1] text-[#7A7670] text-[11px]">—</span>
+                        @endif
+                    </td>
                     <td class="px-3 py-3 font-mono text-[11px] text-[#7A7670]">{{ substr($project->hash_id,0,8) }}…</td>
                     <td class="px-4 py-3">
                         <div class="flex items-center justify-end gap-1.5">
@@ -85,7 +93,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="6" class="px-6 py-12 text-center">
+                <tr><td colspan="7" class="px-6 py-12 text-center">
                     <div class="w-12 h-12 rounded-full bg-[#F6F5F1] border border-[#E8DFD1] flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-layer-group text-[#7A7670]"></i></div>
                     <div class="text-[13px] font-medium">Belum ada karya</div>
                     <div class="text-[12px] text-[#7A7670]">Klik Tambah Karya untuk publish pertama.</div>

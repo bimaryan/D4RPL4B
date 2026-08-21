@@ -35,6 +35,9 @@
                         <span class="w-2.5 h-2.5 rounded-full bg-white/90 border border-black/10 shadow-sm"></span>
                         <span class="w-2.5 h-2.5 rounded-full bg-white/60 border border-black/10"></span>
                     </div>
+                    @if($project->portfolio_path)
+                        <div class="absolute top-3 right-3 bg-emerald-500 text-white text-[10px] font-[700] tracking-[0.08em] uppercase px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> Hosting Live</div>
+                    @endif
                 </div>
                 <div class="p-5 flex flex-col flex-1">
                     <h3 class="font-display text-[17px] font-[600] leading-[1.25] tracking-[-0.015em] line-clamp-1 group-hover:text-[#E84E0F] transition-colors">{{ $project->title }}</h3>
@@ -51,12 +54,26 @@
                     </div>
                     @endif
 
+                    @php
+                        $hostedUrl = $project->portfolio_url;
+                        $primaryUrl = $hostedUrl ?? $project->demo_url;
+                        $isHosted = (bool) $hostedUrl;
+                    @endphp
                     <div class="flex items-center gap-2 mt-5 pt-4 border-t border-[#E8DFD1]">
-                        <a href="{{ $project->demo_url ?? '#' }}" target="_blank" class="flex-1 inline-flex items-center justify-center gap-1.5 h-[40px] rounded-full bg-[#141210] text-white text-[13px] font-[500] hover:bg-black transition">Live Demo <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+                        @if($primaryUrl)
+                            <a href="{{ $primaryUrl }}" target="_blank" class="flex-1 inline-flex items-center justify-center gap-1.5 h-[40px] rounded-full {{ $isHosted ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-[#141210] hover:bg-black' }} text-white text-[13px] font-[500] transition">
+                                {{ $isHosted ? 'Buka Hosting' : 'Live Demo' }} <i class="fa-solid {{ $isHosted ? 'fa-server' : 'fa-arrow-up-right-from-square' }} text-[10px]"></i>
+                            </a>
+                        @else
+                            <span class="flex-1 inline-flex items-center justify-center gap-1.5 h-[40px] rounded-full bg-[#F6F5F1] border border-[#E8DFD1] text-[#7A7670] text-[13px] font-[500]">Belum ada demo</span>
+                        @endif
                         <a href="{{ $project->repo_url ?? '#' }}" target="_blank" class="w-10 h-10 rounded-full border border-[#E8DFD1] bg-white flex items-center justify-center hover:bg-[#141210] hover:text-white hover:border-[#141210] transition" title="Repository">
                             <i class="fa-brands fa-github text-[14px]"></i>
                         </a>
                     </div>
+                    @if($isHosted)
+                        <div class="mt-2 text-[11px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1 text-center truncate"><i class="fa-solid fa-link mr-1"></i> {{ $hostedUrl }}</div>
+                    @endif
                 </div>
             </article>
             @endforeach

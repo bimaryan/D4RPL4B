@@ -45,22 +45,23 @@
                     <div class="font-display font-semibold text-[15px]">D4 RPL 4B</div>
                 </div>
                 <h1 class="font-display text-[24px] font-semibold tracking-tight">Masuk Portal</h1>
-                <p class="text-[13px] text-[#7A7670] mt-1">Gunakan akun admin untuk melanjutkan.</p>
+                <p class="text-[13px] text-[#7A7670] mt-1">Mahasiswa: NIM sebagai username & password. Admin: pakai NIM atau email.</p>
 
                 @if ($errors->any())
-                    <div class="mt-5 rounded-[12px] bg-red-50 border border-red-200 text-red-700 text-[13px] px-4 py-3">{{ $errors->first() }}</div>
+                    <div class="mt-5 rounded-[12px] bg-red-50 border border-red-200 text-red-700 text-[13px] px-4 py-3 flex items-start gap-2"><i class="fa-solid fa-circle-exclamation mt-0.5"></i> <span>{{ $errors->first() }}</span></div>
                 @endif
 
                 <form method="POST" action="{{ route('login.post') }}" class="mt-6 space-y-4">
                     @csrf
                     <div>
-                        <label class="block font-mono text-[11px] tracking-wide uppercase text-[#7A7670] mb-1.5">Email</label>
-                        <input type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="admin@polindra.ac.id"
+                        <label class="block font-mono text-[11px] tracking-wide uppercase text-[#7A7670] mb-1.5">NIM <span class="normal-case tracking-normal text-[#A8A29E]">/ Email admin</span></label>
+                        <input type="text" name="nim" value="{{ old('nim') }}" required autofocus placeholder="Contoh: 23001xxx"
                             class="w-full bg-white border border-[#E8DFD1] rounded-full px-4 py-3 text-[14px] focus:outline-none focus:border-[#141210] focus:ring-4 focus:ring-black/5 transition">
+                        <div class="text-[11px] text-[#7A7670] mt-1.5 flex items-center gap-1.5"><i class="fa-solid fa-circle-info text-[10px]"></i> Mahasiswa: password = NIM yang sama</div>
                     </div>
                     <div>
                         <label class="block font-mono text-[11px] tracking-wide uppercase text-[#7A7670] mb-1.5">Password</label>
-                        <input type="password" name="password" required placeholder="••••••••"
+                        <input type="password" name="password" required placeholder="Masukkan NIM sebagai password"
                             class="w-full bg-white border border-[#E8DFD1] rounded-full px-4 py-3 text-[14px] focus:outline-none focus:border-[#141210] focus:ring-4 focus:ring-black/5 transition">
                     </div>
                     <label class="flex items-center gap-2 py-1">

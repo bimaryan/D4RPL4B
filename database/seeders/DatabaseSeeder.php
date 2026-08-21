@@ -46,10 +46,11 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($students as $student) {
-            Student::firstOrCreate(
+            Student::updateOrCreate(
                 ['nim' => $student[0]],
                 [
                     'name' => ucwords(strtolower($student[1])),
+                    'password' => $student[0],
                     'github_url' => 'https://github.com',
                     'linkedin_url' => 'https://linkedin.com',
                 ]

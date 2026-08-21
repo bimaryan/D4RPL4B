@@ -3,15 +3,41 @@
 namespace App\Models;
 
 use App\Traits\HasHashId;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 
-class Student extends Model
+class Student extends Authenticatable
 {
-    use HasHashId;
+    use HasFactory, Notifiable, HasHashId;
 
-    protected $fillable = ['nim', 'name', 'github_url', 'linkedin_url', 'portfolio_url', 'photo'];
+    protected $fillable = ['nim', 'name', 'github_url', 'linkedin_url', 'portfolio_url', 'photo', 'password'];
+    protected $hidden = ['password', 'remember_token'];
     protected $appends = ['photo_url'];
+
+    protected function casts(): array
+    {
+        return [
+            'password' => 'hashed',
+        ];
+    }
+
+    // Untuk login pakai NIM (bukan email)
+    public function getAuthIdentifierName()
+    {
+        return 'nim';
+    }
+
+    public function hosting()
+    {
+        return $this->hasOne(Hosting::class);
+    }
+
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
 
     public function getPhotoUrlAttribute(): ?string
     {

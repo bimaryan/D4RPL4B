@@ -25,7 +25,6 @@
         </div>
         <div class="flex items-center gap-1">
             <button class="w-8 h-8 rounded-lg border border-[#E8DFD1] bg-white flex items-center justify-center text-[#7A7670] hover:text-[#11100F]"><i class="fa-solid fa-arrow-down-wide-short text-[11px]"></i></button>
-            <button class="w-8 h-8 rounded-lg border border-[#E8DFD1] bg-white flex items-center justify-center text-[#7A7670]"><i class="fa-solid fa-ellipsis text-[11px]"></i></button>
         </div>
     </div>
     <div class="overflow-x-auto">
@@ -53,11 +52,10 @@
                     <td class="px-4 py-3">
                         <div class="flex justify-end gap-1.5">
                             <a href="{{ route('schedules.edit', $s->hash_id) }}" class="px-3 py-1.5 rounded-full bg-white border border-[#E8DFD1] text-[12px] font-medium hover:bg-[#F6F5F1]"><i class="fa-solid fa-pen text-[10px] mr-1"></i> Edit</a>
-                            <form action="{{ route('schedules.destroy', $s->hash_id) }}" method="POST" onsubmit="return confirmDelete(this, 'Hapus Data?', 'Hapus jadwal? Yakin ingin melanjutkan? Tindakan tidak bisa dibatalkan')">
+                            <form action="{{ route('schedules.destroy', $s->hash_id) }}" method="POST" onsubmit="return confirmDelete(this, 'Hapus Data?', 'Hapus jadwal ini? Yakin ingin melanjutkan? Tindakan tidak bisa dibatalkan')">
                                 @csrf @method('DELETE')
                                 <button class="w-8 h-8 rounded-full bg-white border border-red-200 text-red-600 flex items-center justify-center hover:bg-red-50"><i class="fa-solid fa-trash text-[11px]"></i></button>
                             </form>
-                            <button class="w-8 h-8 rounded-full border border-[#E8DFD1] bg-white hidden group-hover:flex items-center justify-center text-[#7A7670]"><i class="fa-solid fa-ellipsis text-[11px]"></i></button>
                         </div>
                     </td>
                 </tr>

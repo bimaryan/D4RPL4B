@@ -39,8 +39,28 @@
                 </div>
 
                 <div><label class="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#7A7670] mb-1.5 block">Tech Stack (pisah koma)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#7A7670]"><i class="fa-solid fa-code text-[11px]"></i></span><input type="text" name="tech_stack" value="{{ old('tech_stack') }}" placeholder="Laravel, Tailwind, MySQL" class="form-input pl-9"></div></div>
+
+                <div class="border border-[#E8DFD1] rounded-xl p-4 bg-[#FFFBF0] space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-7 h-7 rounded-lg bg-[#11100F] text-white flex items-center justify-center"><i class="fa-solid fa-server text-[11px]"></i></span>
+                        <div>
+                            <div class="font-medium text-[13px]">Portfolio Hosting (Full Web Server)</div>
+                            <div class="text-[11px] text-[#7A7670]">Upload ZIP berisi website statis — otomatis di-host</div>
+                        </div>
+                    </div>
+                    <label class="flex items-center gap-3 border-2 border-dashed border-[#E8DFD1] rounded-xl p-4 bg-white hover:bg-[#FCFBF9] cursor-pointer">
+                        <span class="w-10 h-10 rounded-lg bg-[#F6F5F1] border border-[#E8DFD1] flex items-center justify-center"><i class="fa-solid fa-file-zipper text-[#7A7670]"></i></span>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[13px] font-medium">Upload Portfolio ZIP</div>
+                            <div class="text-[11px] text-[#7A7670] truncate" id="portfolio-file">Belum ada file • max 50MB • harus ada index.html</div>
+                        </div>
+                        <input type="file" name="portfolio" accept=".zip" class="hidden" onchange="document.getElementById('portfolio-file').textContent=this.files[0]?this.files[0].name+' ('+Math.round(this.files[0].size/1024)+' KB)':'Belum ada file • max 50MB • harus ada index.html'">
+                    </label>
+                    <div class="text-[11px] text-[#7A7670] flex items-center gap-1.5"><i class="fa-solid fa-circle-info text-[10px]"></i> ZIP akan di-extract ke <span class="font-mono bg-white border border-[#E8DFD1] rounded px-1.5 py-0.5">/portfolio/{hash}</span> dan serve sebagai web statis.</div>
+                </div>
+
                 <div class="grid md:grid-cols-2 gap-4">
-                    <div><label class="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#7A7670] mb-1.5 block">Live Demo URL</label><input type="url" name="demo_url" value="{{ old('demo_url') }}" placeholder="https://..." class="form-input"></div>
+                    <div><label class="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#7A7670] mb-1.5 block">Live Demo URL <span class="font-normal normal-case">(jika tidak hosting)</span></label><input type="url" name="demo_url" value="{{ old('demo_url') }}" placeholder="https://..." class="form-input"></div>
                     <div><label class="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#7A7670] mb-1.5 block">Repository URL</label><input type="url" name="repo_url" value="{{ old('repo_url') }}" placeholder="https://github.com/..." class="form-input"></div>
                 </div>
                 <div class="flex justify-end gap-2 pt-2 border-t border-[#E8DFD1]">

@@ -40,8 +40,44 @@
                 </div>
 
                 <div><label class="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#7A7670] mb-1.5 block">Tech Stack</label><input type="text" name="tech_stack" value="{{ old('tech_stack', is_array($project->tech_stack) ? implode(', ', $project->tech_stack) : '') }}" class="form-input"></div>
+
+                <div class="border border-[#E8DFD1] rounded-xl p-4 bg-[#FFFBF0] space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-[#11100F] text-white flex items-center justify-center"><i class="fa-solid fa-server text-[11px]"></i></span>
+                            <div>
+                                <div class="font-medium text-[13px]">Portfolio Hosting</div>
+                                <div class="text-[11px] text-[#7A7670]">ZIP → /portfolio/{{ $project->hash_id }}</div>
+                            </div>
+                        </div>
+                        @if($project->portfolio_path)
+                            <a href="{{ $project->portfolio_url }}" target="_blank" class="text-[11px] font-medium bg-emerald-500 text-white px-2.5 py-1 rounded-full"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Live</a>
+                        @else
+                            <span class="text-[11px] bg-white border border-[#E8DFD1] rounded-full px-2.5 py-1 text-[#7A7670]">Belum ada</span>
+                        @endif
+                    </div>
+                    @if($project->portfolio_path)
+                        <div class="flex items-center gap-2 text-[11px] font-mono bg-white border border-[#E8DFD1] rounded-lg px-3 py-2">
+                            <i class="fa-solid fa-link text-[#7A7670]"></i>
+                            <a href="{{ $project->portfolio_url }}" target="_blank" class="truncate text-[#2563EB] hover:underline">{{ $project->portfolio_url }}</a>
+                            <span class="ml-auto text-[#7A7670]">{{ $project->portfolio_path }}</span>
+                        </div>
+                    @endif
+                    <label class="flex items-center gap-3 border-2 border-dashed border-[#E8DFD1] rounded-xl p-3 bg-white hover:bg-[#FCFBF9] cursor-pointer">
+                        <span class="w-10 h-10 rounded-lg bg-[#F6F5F1] border border-[#E8DFD1] flex items-center justify-center"><i class="fa-solid fa-file-zipper text-[#7A7670]"></i></span>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[12px] font-medium">Ganti / Upload ZIP</div>
+                            <div class="text-[11px] text-[#7A7670] truncate" id="edit-portfolio">Belum ada file baru • max 50MB</div>
+                        </div>
+                        <input type="file" name="portfolio" accept=".zip" class="hidden" onchange="document.getElementById('edit-portfolio').textContent=this.files[0]?this.files[0].name+' ('+Math.round(this.files[0].size/1024)+' KB)':'Belum ada file baru • max 50MB'">
+                    </label>
+                    @if($project->portfolio_path)
+                        <label class="flex items-center gap-2 text-[12px]"><input type="checkbox" name="remove_portfolio" value="1" class="rounded"> Hapus hosting portfolio</label>
+                    @endif
+                </div>
+
                 <div class="grid md:grid-cols-2 gap-4">
-                    <div><label class="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#7A7670] mb-1.5 block">Demo URL</label><input type="url" name="demo_url" value="{{ old('demo_url', $project->demo_url) }}" class="form-input"></div>
+                    <div><label class="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#7A7670] mb-1.5 block">Demo URL <span class="font-normal">(alternatif)</span></label><input type="url" name="demo_url" value="{{ old('demo_url', $project->demo_url) }}" placeholder="https://..." class="form-input"></div>
                     <div><label class="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#7A7670] mb-1.5 block">Repo URL</label><input type="url" name="repo_url" value="{{ old('repo_url', $project->repo_url) }}" class="form-input"></div>
                 </div>
                 <div class="flex justify-end gap-2 pt-2 border-t border-[#E8DFD1]">
