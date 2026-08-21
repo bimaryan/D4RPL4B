@@ -128,7 +128,94 @@ class ProjectController extends Controller
         if ($project->image_url && !str_starts_with($project->image_url, 'http')) {
             Storage::disk('public')->delete($project->image_url);
         }
+        if ($project->portfolio_path) {
+            $this->deletePortfolio($project);
+        }
         $project->delete();
         return redirect()->route('projects.index')->with('success', 'Karya berhasil dihapus.');
+    }
+
+    private function handlePortfolioUpload(Project $project, $file): void
+    {
+        // Hapus portfolio lama
+        if ($project->portfolio_path) {
+            $this->deletePortfolio($project);
+        }
+
+        $hash = $project->hash_id;
+        $extractPath = storage_path('app/public/portfolios/' . $hash);
+
+        // Bersihkan folder lama
+        if (is_dir($extractPath)) {
+            $this->deleteDirectory($extractPath);
+        }
+        mkdir($extractPath, 0755, true);
+
+        $zip = new \ZipArchive();
+        if ($zip->open($file->getPathname()) === true) {
+            // Security: prevent zip slip
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $filename = $zip->getNameIndex($i);
+                if (str_contains($filename, '..') || str_starts_with($filename, '/')) {
+                    continue;
+                }
+                $zip->extractTo($extractPath);
+                break;
+            }
+            // Extract all safely
+            $zip->extractTo($extractPath);
+            $zip->close();
+
+            // Flatten if single top-level folder
+            $files = scandir($extractPath);
+            $files = array_diff($files, ['.', '..']);
+            if (count($files) === 1) {
+                $single = $extractPath . '/' . reset($files);
+                if (is_dir($single)) {
+                    $inner = scandir($single);
+                    $inner = array_diff($inner, ['.', '..']);
+                    foreach ($inner as $item) {
+                        rename($single . '/' . $item, $extractPath . '/' . $item);
+                    }
+                    rmdir($single);
+                }
+            }
+
+            // Detect index file
+            $index = 'index.html';
+            if (!file_exists($extractPath . '/index.html')) {
+                $found = glob($extractPath . '/*.html');
+                if (!empty($found)) {
+                    $index = basename($found[0]);
+                }
+            }
+
+            $project->update([
+                'portfolio_path' => 'portfolios/' . $hash,
+                'portfolio_index' => $index,
+            ]);
+        }
+    }
+
+    private function deletePortfolio(Project $project): void
+    {
+        if (!$project->portfolio_path) return;
+        $path = storage_path('app/public/' . $project->portfolio_path);
+        if (is_dir($path)) {
+            $this->deleteDirectory($path);
+        } else {
+            Storage::disk('public')->delete($project->portfolio_path);
+        }
+    }
+
+    private function deleteDirectory(string $dir): void
+    {
+        if (!is_dir($dir)) return;
+        $items = array_diff(scandir($dir), ['.', '..']);
+        foreach ($items as $item) {
+            $path = $dir . '/' . $item;
+            is_dir($path) ? $this->deleteDirectory($path) : unlink($path);
+        }
+        rmdir($dir);
     }
 }

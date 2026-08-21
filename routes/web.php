@@ -9,6 +9,9 @@ use App\Models\Announcement;
 use App\Models\Gallery;
 use App\Models\Schedule;
 
+// Portfolio Hosting - serve project portfolios
+Route::get('/portfolio/{hash}/{any?}', [\App\Http\Controllers\PortfolioController::class, 'show'])->where('any', '.*')->name('portfolio.show');
+
 // Public Landing Page
 Route::get('/', function () {
     $students = Student::orderBy('nim')->get();
