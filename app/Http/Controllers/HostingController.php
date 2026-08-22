@@ -35,9 +35,10 @@ class HostingController extends Controller
             file_put_contents($full . '/index.html', "<html><head><title>{$student->name} — D4 RPL 4B</title><style>body{font-family:system-ui;background:#FDF9F3;color:#141210;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0} .card{background:white;border:1px solid #E8DFD1;border-radius:16px;padding:32px;max-width:480px;text-align:center} h1{font-size:24px;margin:0 0 8px} p{color:#7A7670}</style></head><body><div class=card><h1>👋 Halo, {$student->name}</h1><p>NIM {$student->nim} — Hosting aktif di Polindra D4 RPL 4B.<br>Upload file via cPanel.</p><p style='margin-top:16px'><a href='/' style='color:#E84E0F'>← Kembali ke landing</a></p></div></body></html>");
         }
 
+        $appHost = parse_url(config('app.url', 'http://d4rpl4b.ryaze.cloud'), PHP_URL_HOST) ?? 'd4rpl4b.ryaze.cloud';
         $hosting = Hosting::create([
             'student_id' => $student->id,
-            'domain' => $validated['domain'] ?? strtolower($student->nim) . '.d4rpl4b.test',
+            'domain' => $validated['domain'] ?? strtolower($student->nim) . '.' . $appHost,
             'path' => $path,
             'quota_mb' => $validated['quota_mb'] ?? 500,
         ]);

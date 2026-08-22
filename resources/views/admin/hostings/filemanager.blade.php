@@ -18,10 +18,35 @@ document.addEventListener('alpine:init', () => {
         breadcrumbs: @js($breadcrumbs),
         selectedFiles: [],
         selectAll: false,
+        searchQuery: '',
+        allItems: @js($items),
         clipboard: JSON.parse(sessionStorage.getItem('fm_clipboard') || '{"mode":"","files":[]}'),
         navigate(p) { window.location = '?path=' + encodeURIComponent(p); },
+        get filteredItems() {
+            if (!this.searchQuery.trim()) return this.allItems;
+            const q = this.searchQuery.toLowerCase();
+            return this.allItems.filter(it => it.name.toLowerCase().includes(q));
+        },
+        get isIndeterminate() {
+            return this.selectedFiles.length > 0 && this.selectedFiles.length < this.filteredItems.length;
+        },
+        get isAllSelected() {
+            return this.filteredItems.length > 0 && this.selectedFiles.length === this.filteredItems.length;
+        },
         toggleSelectAll() {
-            this.selectedFiles = this.selectAll ? @js(array_column($items, 'path')) : [];
+            if (this.isAllSelected) {
+                this.selectedFiles = [];
+                this.selectAll = false;
+            } else {
+                this.selectedFiles = this.filteredItems.map(it => it.path);
+                this.selectAll = true;
+            }
+        },
+        updateCheckboxState() {
+            const cb = document.getElementById('cb-select-all');
+            if (!cb) return;
+            cb.indeterminate = this.isIndeterminate;
+            cb.checked = this.isAllSelected;
         },
         copySelected() {
             this.clipboard = { mode: 'copy', files: this.selectedFiles };
@@ -117,15 +142,29 @@ document.addEventListener('alpine:init', () => {
 
     <!-- Breadcrumbs + toolbar -->
     <div class="bg-white border border-[#E8DFD1] rounded-xl overflow-hidden shadow-sm">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 px-4 py-3 border-b border-[#E8DFD1] bg-[#FCFBF9]">
-            <nav class="flex items-center gap-1 text-[13px] font-mono overflow-x-auto">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3 border-b border-[#E8DFD1] bg-[#FCFBF9]">
+            <nav class="flex items-center gap-1 text-[13px] font-mono overflow-x-auto min-w-0">
                 <template x-for="crumb in breadcrumbs" :key="crumb.path">
-                    <span class="flex items-center gap-1">
+                    <span class="flex items-center gap-1 shrink-0">
                         <a :href="'?path='+encodeURIComponent(crumb.path)" class="px-2 py-1 rounded-full hover:bg-white border border-transparent hover:border-[#E8DFD1] transition" :class="crumb.path===path ? 'bg-white border-[#E8DFD1] font-medium' : 'text-[#7A7670]'" x-text="crumb.name"></a>
                         <span class="text-[#D6CFC2]">/</span>
                     </span>
                 </template>
             </nav>
+            <!-- Search bar -->
+            <div class="flex items-center gap-2 bg-white border border-[#E8DFD1] rounded-full pl-3 pr-2 py-1.5 w-full sm:w-[220px]">
+                <i class="fa-solid fa-magnifying-glass text-[11px] text-[#7A7670] shrink-0"></i>
+                <input
+                    x-model="searchQuery"
+                    @input="selectedFiles = []; $nextTick(() => updateCheckboxState())"
+                    placeholder="Cari file..."
+                    id="fm-search"
+                    class="bg-transparent text-[13px] outline-none flex-1 placeholder:text-[#A8A29E] min-w-0"
+                >
+                <button x-show="searchQuery" @click="searchQuery=''; selectedFiles=[]; $nextTick(()=>updateCheckboxState())" class="w-5 h-5 rounded-full bg-[#F6F5F1] flex items-center justify-center text-[#7A7670] hover:bg-[#E8DFD1]">
+                    <i class="fa-solid fa-xmark text-[9px]"></i>
+                </button>
+            </div>
         </div>
 
         <!-- Upload zone -->
@@ -137,7 +176,7 @@ document.addEventListener('alpine:init', () => {
                     <span class="w-10 h-10 rounded-lg bg-[#11100F] text-white flex items-center justify-center"><i class="fa-solid fa-cloud-arrow-up"></i></span>
                     <div class="flex-1">
                         <div class="text-[13px] font-medium">Drop file atau klik pilih</div>
-                        <div class="text-[11px] text-[#7A7670]">Max 50MB per file, auto extract ZIP? upload manual</div>
+                        <div class="text-[11px] text-[#7A7670]">Max 50MB per file</div>
                     </div>
                     <input type="file" name="files[]" multiple class="hidden" onchange="this.form.querySelector('#upload-name').textContent = Array.from(this.files).map(f=>f.name).join(', ')">
                 </label>
@@ -153,98 +192,136 @@ document.addEventListener('alpine:init', () => {
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="border-b border-[#E8DFD1] text-[11px] font-semibold text-[#7A7670] uppercase tracking-wider">
-                        <th class="px-4 py-3 w-8">
-                            <input type="checkbox" x-model="selectAll" @change="toggleSelectAll()" class="rounded border-[#E8DFD1] text-[#11100F] focus:ring-[#11100F]">
+                        <th class="pl-3 pr-1 py-3 w-8">
+                            <input
+                                type="checkbox"
+                                id="cb-select-all"
+                                @click="toggleSelectAll()"
+                                x-effect="updateCheckboxState()"
+                                class="rounded border-[#E8DFD1] text-[#11100F] focus:ring-[#11100F] cursor-pointer"
+                            >
                         </th>
-                        <th class="px-4 py-3">Nama File</th>
-                        <th class="px-4 py-3 w-32 hidden sm:table-cell">Ukuran</th>
-                        <th class="px-4 py-3 w-40 hidden md:table-cell">Tanggal</th>
-                        <th class="px-4 py-3 w-20 text-right">Aksi</th>
+                        <th class="px-2 py-3">
+                            <span x-show="!searchQuery">Nama File</span>
+                            <span x-show="searchQuery" class="text-[#2563EB]" x-text="filteredItems.length + ' hasil untuk &quot;' + searchQuery + '&quot;'"></span>
+                        </th>
+                        <th class="px-3 py-3 w-32 hidden sm:table-cell">Ukuran</th>
+                        <th class="px-3 py-3 w-40 hidden md:table-cell">Tanggal</th>
+                        <th class="pr-3 pl-1 py-3 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if($rel !== '')
-                    <tr class="border-b border-[#F6F5F1] hover:bg-[#F6F5F1]/50 transition-colors group cursor-pointer" onclick="window.location='?path={{ urlencode(dirname($rel) === '.' ? '' : dirname($rel)) }}'">
-                        <td class="px-4 py-3"></td>
-                        <td class="px-4 py-3 flex items-center gap-3">
+                    <tr x-show="!searchQuery" class="border-b border-[#F6F5F1] hover:bg-[#F6F5F1]/50 transition-colors cursor-pointer" onclick="window.location='?path={{ urlencode(dirname($rel) === '.' ? '' : dirname($rel)) }}'">
+                        <td class="pl-3 pr-1 py-3"></td>
+                        <td class="px-2 py-3 flex items-center gap-2">
                             <div class="w-8 h-8 rounded bg-white border border-[#E8DFD1] flex items-center justify-center shrink-0">
                                 <i class="fa-solid fa-level-up-alt text-[#7A7670]"></i>
                             </div>
                             <span class="text-[13px] font-medium">.. (Kembali)</span>
                         </td>
-                        <td class="px-4 py-3 hidden sm:table-cell"></td>
-                        <td class="px-4 py-3 hidden md:table-cell"></td>
-                        <td class="px-4 py-3"></td>
+                        <td class="px-3 py-3 hidden sm:table-cell"></td>
+                        <td class="px-3 py-3 hidden md:table-cell"></td>
+                        <td class="pr-3 pl-1 py-3"></td>
                     </tr>
                     @endif
 
-                    @forelse($items as $it)
-                    <tr class="border-b border-[#F6F5F1] hover:bg-[#FCFBF9] transition-colors group">
-                        <td class="pl-3 pr-1 py-3 w-8">
-                            <input type="checkbox" value="{{ $it['path'] }}" x-model="selectedFiles" class="rounded border-[#E8DFD1] text-[#11100F] focus:ring-[#11100F]">
-                        </td>
-                        <td class="px-2 py-3">
-                            <div class="flex items-center gap-2">
-                                <span class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-[13px] {{ $it['is_dir'] ? 'bg-[#E6F0FF] border border-[#BFDBFE] text-[#2563EB]' : 'bg-white border border-[#E8DFD1] text-[#7A7670]' }}">
-                                    @if($it['is_dir'])<i class="fa-solid fa-folder"></i>
-                                    @elseif(in_array($it['ext'], ['html','htm']))<i class="fa-brands fa-html5 text-[#E84E0F]"></i>
-                                    @elseif($it['ext']==='css')<i class="fa-brands fa-css3 text-[#2563EB]"></i>
-                                    @elseif(in_array($it['ext'], ['js','mjs']))<i class="fa-brands fa-js text-amber-500"></i>
-                                    @elseif(in_array($it['ext'], ['png','jpg','jpeg','webp','gif','svg']))<i class="fa-regular fa-image"></i>
-                                    @elseif($it['ext']==='zip')<i class="fa-solid fa-file-zipper"></i>
-                                    @else<i class="fa-regular fa-file"></i>
-                                    @endif
-                                </span>
-                                <div class="min-w-0 flex-1">
-                                    @if($it['is_dir'])
-                                        <a href="?path={{ urlencode($it['path']) }}" class="font-medium hover:text-[#2563EB] hover:underline block truncate text-[13px]">{{ $it['name'] }}</a>
-                                    @else
-                                        <div class="font-medium truncate text-[13px]">{{ $it['name'] }}</div>
-                                    @endif
-                                    {{-- size + date on mobile only --}}
-                                    <div class="sm:hidden text-[10px] text-[#7A7670] font-mono">{{ $it['size'] }} • {{ $it['mtime'] }}</div>
+                    {{-- Alpine-rendered rows from filteredItems --}}
+                    <template x-for="it in filteredItems" :key="it.path">
+                        <tr class="border-b border-[#F6F5F1] hover:bg-[#FCFBF9] transition-colors group">
+                            <td class="pl-3 pr-1 py-3 w-8">
+                                <input type="checkbox" :value="it.path" x-model="selectedFiles" @change="$nextTick(()=>updateCheckboxState())" class="rounded border-[#E8DFD1] text-[#11100F] focus:ring-[#11100F]">
+                            </td>
+                            <td class="px-2 py-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-[13px]"
+                                        :class="it.is_dir ? 'bg-[#E6F0FF] border border-[#BFDBFE] text-[#2563EB]' : 'bg-white border border-[#E8DFD1] text-[#7A7670]'">
+                                        <i :class="{
+                                            'fa-solid fa-folder': it.is_dir,
+                                            'fa-brands fa-html5 text-[#E84E0F]': !it.is_dir && (it.ext==='html'||it.ext==='htm'),
+                                            'fa-brands fa-css3 text-[#2563EB]': !it.is_dir && it.ext==='css',
+                                            'fa-brands fa-js text-amber-500': !it.is_dir && (it.ext==='js'||it.ext==='mjs'),
+                                            'fa-regular fa-image': !it.is_dir && ['png','jpg','jpeg','webp','gif','svg'].includes(it.ext),
+                                            'fa-solid fa-file-zipper': !it.is_dir && it.ext==='zip',
+                                            'fa-regular fa-file': !it.is_dir && !['html','htm','css','js','mjs','png','jpg','jpeg','webp','gif','svg','zip'].includes(it.ext)
+                                        }"></i>
+                                    </span>
+                                    <div class="min-w-0 flex-1">
+                                        <template x-if="it.is_dir">
+                                            <a :href="'?path='+encodeURIComponent(it.path)" class="font-medium hover:text-[#2563EB] hover:underline block truncate text-[13px]" x-text="it.name"></a>
+                                        </template>
+                                        <template x-if="!it.is_dir">
+                                            <div class="font-medium truncate text-[13px]" x-text="it.name"></div>
+                                        </template>
+                                        <div class="sm:hidden text-[10px] text-[#7A7670] font-mono" x-text="it.size + ' • ' + it.mtime"></div>
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td class="px-3 py-3 hidden sm:table-cell font-mono text-[12px] whitespace-nowrap">{{ $it['size'] }}</td>
-                        <td class="px-3 py-3 hidden md:table-cell text-[12px] text-[#7A7670] whitespace-nowrap">{{ $it['mtime'] }}</td>
-                        <td class="pr-3 pl-1 py-3">
-                            <div class="flex items-center justify-end gap-1">
-                                @if(!$it['is_dir'])
-                                    <button @click="(($d)=>{ fetch('{{ $r_edit }}?path='+encodeURIComponent('{{ $it['path'] }}')).then(r=>r.json()).then(d=>{ $d.editPath=d.path; $d.editName=d.name; $d.editContent=d.content; $d.showEditor=true; $nextTick(()=>{ initMonaco() }); }); })($data)" class="w-7 h-7 rounded-full bg-white border border-[#E8DFD1] flex items-center justify-center hover:bg-[#11100F] hover:text-white" title="Edit"><i class="fa-solid fa-pen text-[10px]"></i></button>
-                                    <a href="{{ $r_download }}?path={{ urlencode($it['path']) }}" class="w-7 h-7 rounded-full bg-white border border-[#E8DFD1] flex items-center justify-center hover:bg-[#F6F5F1]" title="Download"><i class="fa-solid fa-download text-[10px]"></i></a>
-                                @else
-                                    <a href="?path={{ urlencode($it['path']) }}" class="w-7 h-7 rounded-full bg-[#11100F] text-white flex items-center justify-center" title="Buka"><i class="fa-solid fa-arrow-right text-[10px]"></i></a>
-                                @endif
-                                {{-- Rename: always visible on mobile, hover on desktop --}}
-                                <button @click="renamePath='{{ $it['path'] }}'; renameNew='{{ $it['name'] }}'; showRename=true" class="w-7 h-7 rounded-full bg-white border border-[#E8DFD1] flex sm:hidden group-hover:flex items-center justify-center hover:bg-[#F6F5F1]" title="Rename"><i class="fa-solid fa-i-cursor text-[10px]"></i></button>
-                                @if(strtolower(pathinfo($it['name'], PATHINFO_EXTENSION)) === 'zip')
-                                <form action="{{ $r_extract }}" method="POST" onsubmit="return confirmDelete(this, 'Ekstrak ZIP?', 'Semua isinya akan masuk ke folder ini.')">
-                                    @csrf
-                                    <input type="hidden" name="path" value="{{ $it['path'] }}">
-                                    <button class="w-7 h-7 rounded-full bg-[#11100F] text-white flex items-center justify-center hover:bg-black" title="Extract"><i class="fa-solid fa-file-zipper text-[10px]"></i></button>
-                                </form>
-                                @endif
-                                <form action="{{ $r_delete }}" method="POST" onsubmit="return confirmDelete(this, 'Hapus File?', 'Yakin hapus {{ $it['name'] }}?')">
-                                    @csrf @method('DELETE')
-                                    <input type="hidden" name="path" value="{{ $it['path'] }}">
-                                    <button class="w-7 h-7 rounded-full bg-white border border-red-200 text-red-600 flex items-center justify-center hover:bg-red-50"><i class="fa-solid fa-trash text-[10px]"></i></button>
-                                </form>
-                            </div>
+                            </td>
+                            <td class="px-3 py-3 hidden sm:table-cell font-mono text-[12px] whitespace-nowrap" x-text="it.size"></td>
+                            <td class="px-3 py-3 hidden md:table-cell text-[12px] text-[#7A7670] whitespace-nowrap" x-text="it.mtime"></td>
+                            <td class="pr-3 pl-1 py-3">
+                                <div class="flex items-center justify-end gap-1">
+                                    {{-- Edit + Download for files, Open for dirs --}}
+                                    <template x-if="!it.is_dir">
+                                        <span class="flex items-center gap-1">
+                                            <button @click="(($d,$it)=>{ fetch('{{ $r_edit }}?path='+encodeURIComponent($it.path)).then(r=>r.json()).then(d=>{ $d.editPath=d.path; $d.editName=d.name; $d.editContent=d.content; $d.showEditor=true; $nextTick(()=>{ initMonaco() }); }); })($data, it)" class="w-7 h-7 rounded-full bg-white border border-[#E8DFD1] flex items-center justify-center hover:bg-[#11100F] hover:text-white" title="Edit"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                                            <a :href="'{{ $r_download }}?path='+encodeURIComponent(it.path)" class="w-7 h-7 rounded-full bg-white border border-[#E8DFD1] flex items-center justify-center hover:bg-[#F6F5F1]" title="Download"><i class="fa-solid fa-download text-[10px]"></i></a>
+                                        </span>
+                                    </template>
+                                    <template x-if="it.is_dir">
+                                        <a :href="'?path='+encodeURIComponent(it.path)" class="w-7 h-7 rounded-full bg-[#11100F] text-white flex items-center justify-center" title="Buka"><i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                                    </template>
+                                    {{-- Rename --}}
+                                    <button @click="renamePath=it.path; renameNew=it.name; showRename=true" class="w-7 h-7 rounded-full bg-white border border-[#E8DFD1] flex sm:hidden group-hover:flex items-center justify-center hover:bg-[#F6F5F1]" title="Rename"><i class="fa-solid fa-i-cursor text-[10px]"></i></button>
+                                    {{-- Extract ZIP --}}
+                                    <template x-if="it.ext === 'zip'">
+                                        <form :action="'{{ $r_extract }}'" method="POST" @submit.prevent="confirmDelete($el, 'Ekstrak ZIP?', 'Semua isinya akan masuk ke folder ini.')">
+                                            @csrf
+                                            <input type="hidden" name="path" :value="it.path">
+                                            <button type="submit" class="w-7 h-7 rounded-full bg-[#11100F] text-white flex items-center justify-center hover:bg-black" title="Extract"><i class="fa-solid fa-file-zipper text-[10px]"></i></button>
+                                        </form>
+                                    </template>
+                                    {{-- Delete --}}
+                                    <form :action="'{{ $r_delete }}'" method="POST" @submit.prevent="confirmDelete($el.closest('form'), 'Hapus File?', 'Yakin hapus ' + it.name + '?')">
+                                        @csrf
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <input type="hidden" name="path" :value="it.path">
+                                        <button type="submit" class="w-7 h-7 rounded-full bg-white border border-red-200 text-red-600 flex items-center justify-center hover:bg-red-50"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+
+                    {{-- No results state --}}
+                    <tr x-show="filteredItems.length === 0">
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <template x-if="searchQuery">
+                                <div>
+                                    <div class="w-12 h-12 rounded-full bg-[#F6F5F1] border border-[#E8DFD1] flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-magnifying-glass text-[#7A7670]"></i></div>
+                                    <div class="text-[13px] font-medium">Tidak ditemukan</div>
+                                    <div class="text-[12px] text-[#7A7670]">Tidak ada file yang cocok dengan "<span x-text="searchQuery"></span>"</div>
+                                    <button @click="searchQuery=''" class="mt-3 px-4 py-2 rounded-full bg-white border border-[#E8DFD1] text-[12px] hover:bg-[#F6F5F1]">Hapus filter</button>
+                                </div>
+                            </template>
+                            <template x-if="!searchQuery">
+                                <div>
+                                    <div class="w-12 h-12 rounded-full bg-[#F6F5F1] border border-[#E8DFD1] flex items-center justify-center mx-auto mb-3"><i class="fa-regular fa-folder-open text-[#7A7670]"></i></div>
+                                    <div class="text-[13px] font-medium">Folder kosong</div>
+                                    <div class="text-[12px] text-[#7A7670]">Upload file atau buat file baru.</div>
+                                </div>
+                            </template>
                         </td>
                     </tr>
-                    @empty
-                    <tr><td colspan="5" class="px-6 py-12 text-center">
-                        <div class="w-12 h-12 rounded-full bg-[#F6F5F1] border border-[#E8DFD1] flex items-center justify-center mx-auto mb-3"><i class="fa-regular fa-folder-open text-[#7A7670]"></i></div>
-                        <div class="text-[13px] font-medium">Folder kosong</div>
-                        <div class="text-[12px] text-[#7A7670]">Upload file atau buat file baru.</div>
-                    </td></tr>
-                    @endforelse
                 </tbody>
             </table>
         </div>
         <div class="px-4 py-3 border-t border-[#E8DFD1] bg-[#FCFBF9] flex items-center justify-between text-[12px] text-[#7A7670]">
-            <span>{{ count($items) }} item • {{ $usage['human'] }} / {{ $hosting->quota_mb }} MB</span>
+            <span>
+                <span x-show="!searchQuery">{{ count($items) }} item</span>
+                <span x-show="searchQuery" x-text="filteredItems.length + ' dari {{ count($items) }} item'"></span>
+                • {{ $usage['human'] }} / {{ $hosting->quota_mb }} MB
+            </span>
             <span class="font-mono text-[11px] hidden sm:inline">{{ $hosting->path }}/{{ $rel }}</span>
         </div>
     </div>

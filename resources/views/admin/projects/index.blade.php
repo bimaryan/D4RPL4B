@@ -10,7 +10,7 @@
     <div class="flex items-center gap-2">
         <div class="hidden sm:flex items-center gap-2 bg-white border border-[#E8DFD1] rounded-full px-3 py-2">
             <i class="fa-solid fa-magnifying-glass text-[11px] text-[#7A7670]"></i>
-            <input placeholder="Cari proyek..." class="bg-transparent text-[13px] outline-none w-[180px] placeholder:text-[#A8A29E]">
+            <input id="search-projects" data-page-search placeholder="Cari proyek..." class="bg-transparent text-[13px] outline-none w-[180px] placeholder:text-[#A8A29E]">
         </div>
         <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#11100F] text-white text-[13px] font-medium hover:bg-black transition"><i class="fa-solid fa-plus text-[11px]"></i> Tambah Karya</a>
     </div>
@@ -30,7 +30,7 @@
     </div>
 
     <div class="overflow-x-auto">
-        <table class="w-full text-left">
+        <table class="w-full text-left" data-searchable="search-projects">
             <thead class="bg-[#F6F5F1] border-b border-[#E8DFD1] text-[11px] font-semibold tracking-[0.08em] uppercase text-[#7A7670]">
                 <tr>
                     <th class="px-4 py-3 w-8"><input type="checkbox" class="rounded border-[#E8DFD1]"></th>
@@ -44,7 +44,7 @@
             </thead>
             <tbody class="divide-y divide-[#E8DFD1]/60 text-[13px]">
                 @forelse($projects as $project)
-                <tr class="hover:bg-[#FCFBF9]">
+                <tr class="hover:bg-[#FCFBF9]" data-row>
                     <td class="px-4 py-3"><input type="checkbox" class="rounded border-[#E8DFD1]"></td>
                     <td class="px-3 py-3">
                         <div class="flex items-center gap-3">
@@ -93,7 +93,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" class="px-6 py-12 text-center">
+                <tr data-empty><td colspan="7" class="px-6 py-12 text-center">
                     <div class="w-12 h-12 rounded-full bg-[#F6F5F1] border border-[#E8DFD1] flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-layer-group text-[#7A7670]"></i></div>
                     <div class="text-[13px] font-medium">Belum ada karya</div>
                     <div class="text-[12px] text-[#7A7670]">Klik Tambah Karya untuk publish pertama.</div>
@@ -103,7 +103,7 @@
         </table>
     </div>
     <div class="flex items-center justify-between px-4 py-3 border-t border-[#E8DFD1] bg-[#FCFBF9] text-[12px] text-[#7A7670]">
-        <span>{{ $projects->count() }} proyek total</span>
+        <span><span data-count>{{ $projects->count() }}</span> proyek total</span>
         <div class="flex items-center gap-1"><span class="px-3 py-1.5 rounded-full bg-[#11100F] text-white">1</span></div>
     </div>
 </div>

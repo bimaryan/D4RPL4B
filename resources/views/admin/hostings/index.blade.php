@@ -11,7 +11,7 @@
         <div class="flex items-center gap-2">
             <div class="hidden sm:flex items-center gap-2 bg-white border border-[#E8DFD1] rounded-full px-3 py-2">
                 <i class="fa-solid fa-magnifying-glass text-[11px] text-[#7A7670]"></i>
-                <input placeholder="Cari mahasiswa..." class="bg-transparent text-[13px] outline-none w-[180px] placeholder:text-[#A8A29E]">
+                <input id="search-hostings" data-page-search placeholder="Cari mahasiswa..." class="bg-transparent text-[13px] outline-none w-[180px] placeholder:text-[#A8A29E]">
             </div>
             <button @click="showCreateModal = true" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#11100F] text-white text-[13px] font-medium hover:bg-black transition"><i class="fa-solid fa-plus text-[11px]"></i> Buat Hosting</button>
         </div>
@@ -20,7 +20,7 @@
     <div class="bg-white border border-[#E8DFD1] rounded-xl overflow-hidden shadow-sm">
         <div class="flex items-center justify-between px-4 py-3 border-b border-[#E8DFD1] bg-[#FCFBF9]">
             <div class="flex items-center gap-2 text-[12px]">
-                <span class="font-medium">{{ $hostings->count() }} Hosting</span>
+                <span class="font-medium"><span data-count>{{ $hostings->count() }}</span> Hosting</span>
                 <span class="w-1 h-1 rounded-full bg-[#E8DFD1]"></span>
                 <span class="text-[#7A7670]">Daftar cPanel</span>
             </div>
@@ -30,7 +30,7 @@
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left">
+            <table class="w-full text-left" data-searchable="search-hostings">
                 <thead class="bg-[#F6F5F1] border-b border-[#E8DFD1] text-[11px] font-semibold tracking-[0.08em] uppercase text-[#7A7670]">
                     <tr>
                         <th class="px-4 py-3 w-8"><input type="checkbox" class="rounded border-[#E8DFD1]"></th>
@@ -42,7 +42,7 @@
                 </thead>
                 <tbody class="divide-y divide-[#E8DFD1]/60 text-[13px]">
                     @forelse($hostings as $h)
-                    <tr class="hover:bg-[#FCFBF9] group">
+                    <tr class="hover:bg-[#FCFBF9] group" data-row>
                         <td class="px-4 py-3"><input type="checkbox" class="rounded border-[#E8DFD1]"></td>
                         <td class="px-3 py-3">
                             <div class="flex items-center gap-3">
@@ -78,7 +78,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="5" class="px-6 py-12 text-center">
+                    <tr data-empty><td colspan="5" class="px-6 py-12 text-center">
                         <div class="w-12 h-12 rounded-full bg-[#F6F5F1] border border-[#E8DFD1] flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-server text-[#7A7670]"></i></div>
                         <div class="text-[13px] font-medium">Belum ada hosting aktif</div>
                         <div class="text-[12px] text-[#7A7670]">Klik Buat Hosting untuk membuat akses cPanel.</div>
@@ -89,7 +89,7 @@
         </div>
 
         <div class="flex items-center justify-between px-4 py-3 border-t border-[#E8DFD1] bg-[#FCFBF9] text-[12px] text-[#7A7670]">
-            <span>Menampilkan {{ $hostings->count() }} hosting</span>
+            <span>Menampilkan <span data-count>{{ $hostings->count() }}</span> hosting</span>
             <div class="flex items-center gap-1">
                 <button class="px-3 py-1.5 rounded-full border border-[#E8DFD1] bg-white disabled:opacity-50" disabled>Sebelumnya</button>
                 <span class="px-3 py-1.5 rounded-full bg-[#11100F] text-white">1</span>
@@ -123,8 +123,8 @@
                     </div>
                     <div>
                         <label class="text-[12px] font-semibold text-[#11100F] mb-1.5 block">Domain <span class="text-[#7A7670] font-normal">(opsional)</span></label>
-                        <input name="domain" placeholder="nim.d4rpl4b.test" class="form-input w-full bg-[#FDF9F3] font-mono text-[13px]">
-                        <div class="text-[11px] text-[#7A7670] mt-1">Kosongkan → auto <span class="font-mono">{{ strtolower('nim') }}.d4rpl4b.test</span></div>
+                        <input name="domain" placeholder="nim.{{ parse_url(config('app.url', 'http://d4rpl4b.ryaze.cloud'), PHP_URL_HOST) ?? 'd4rpl4b.ryaze.cloud' }}" class="form-input w-full bg-[#FDF9F3] font-mono text-[13px]">
+                        <div class="text-[11px] text-[#7A7670] mt-1">Kosongkan → auto <span class="font-mono">{{ strtolower('nim') }}.{{ parse_url(config('app.url', 'http://d4rpl4b.ryaze.cloud'), PHP_URL_HOST) ?? 'd4rpl4b.ryaze.cloud' }}</span></div>
                     </div>
                     <div>
                         <label class="text-[12px] font-semibold text-[#11100F] mb-1.5 block">Quota MB</label>

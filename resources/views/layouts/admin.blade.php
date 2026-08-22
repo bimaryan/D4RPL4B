@@ -142,15 +142,148 @@
                     <span class="font-medium text-[#11100F]">@yield('breadcrumb', 'Dashboard')</span>
                 </div>
                 <div class="ml-auto flex items-center gap-2">
-                    <div class="hidden sm:flex items-center gap-2 bg-[#F6F5F1] border border-[#E8DFD1] rounded-full pl-3 pr-1 py-1">
+                    <div class="hidden sm:flex items-center gap-2 bg-[#F6F5F1] border border-[#E8DFD1] rounded-full pl-3 pr-1 py-1" x-data="{ focused: false }" :class="focused ? 'ring-2 ring-[#11100F]/10 border-[#11100F]/30' : ''">
                         <i class="fa-solid fa-magnifying-glass text-[11px] text-[#7A7670]"></i>
-                        <input placeholder="Cari mahasiswa, proyek..." class="bg-transparent text-[13px] outline-none w-[200px] placeholder:text-[#A8A29E]">
-                        <span class="font-mono text-[10px] bg-white border border-[#E8DFD1] rounded-full px-2 py-1">⌘ K</span>
+                        <input
+                            id="navbar-search"
+                            placeholder="Cari file..." 
+                            class="bg-transparent text-[13px] outline-none w-[180px] placeholder:text-[#A8A29E]"
+                            @focus="focused=true"
+                            @blur="focused=false"
+                            @input="
+                                const q = $event.target.value;
+                                const fm = document.getElementById('fm-root');
+                                if (fm) {
+                                    const alpine = Alpine.$data(fm);
+                                    if (alpine) { alpine.searchQuery = q; }
+                                }
+                                const fmInput = document.getElementById('fm-search');
+                                if (fmInput) fmInput.value = q;
+                            "
+                            @keydown.escape="$event.target.value=''; $event.target.blur(); focused=false; const fm=document.getElementById('fm-root'); if(fm){ const a=Alpine.$data(fm); if(a) a.searchQuery=''; } "
+                        >
+                        <span class="font-mono text-[10px] bg-white border border-[#E8DFD1] rounded-full px-2 py-1 cursor-pointer" @click="document.getElementById('navbar-search').focus()">⌘ K</span>
                     </div>
                     <button class="w-9 h-9 rounded-full border border-[#E8DFD1] bg-white flex items-center justify-center text-[#7A7670] hover:text-[#11100F]"><i class="fa-regular fa-bell text-[14px]"></i></button>
                     <a href="{{ url('/') }}" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#11100F] text-white text-[13px] font-medium hover:bg-black transition"><i class="fa-solid fa-eye text-[11px]"></i> Preview</a>
                 </div>
             </header>
+            <script>
+            // Ctrl+K / Cmd+K global shortcut
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    const input = document.getElementById('navbar-search') || document.getElementById('fm-search');
+                    if (input) { input.focus(); input.select(); }
+                }
+            });
+            </script>
+
+            <script>
+            // ================================================================
+            // Universal Table Search + Checkbox — berlaku semua halaman admin
+            // ================================================================
+            (function() {
+
+                // ----------- TABLE SEARCH FILTER -----------
+                function initTableSearch(input, table) {
+                    if (!input || !table) return;
+                    const countEl = table.closest('[data-table-wrap]')?.querySelector('[data-count]');
+                    const totalEl = table.closest('[data-table-wrap]')?.querySelector('[data-total]');
+                    const total = table.querySelectorAll('tbody tr[data-row]').length;
+                    if (totalEl) totalEl.textContent = total;
+
+                    input.addEventListener('input', function() {
+                        const q = this.value.toLowerCase().trim();
+                        let visible = 0;
+                        table.querySelectorAll('tbody tr[data-row]').forEach(row => {
+                            const text = row.textContent.toLowerCase();
+                            const match = !q || text.includes(q);
+                            row.style.display = match ? '' : 'none';
+                            if (match) visible++;
+                        });
+                        // empty state row
+                        const emptyRow = table.querySelector('tbody tr[data-empty]');
+                        if (emptyRow) emptyRow.style.display = (visible === 0 && q) ? '' : 'none';
+                        if (countEl) countEl.textContent = q ? (visible + ' dari ' + total) : total;
+                        // reset checkboxes
+                        table.querySelectorAll('tbody input[type=checkbox]').forEach(cb => cb.checked = false);
+                        updateHeaderCheckbox(table);
+                    });
+                }
+
+                // ----------- CHECKBOX SELECT ALL -----------
+                function updateHeaderCheckbox(table) {
+                    const headerCb = table.querySelector('thead input[type=checkbox]');
+                    if (!headerCb) return;
+                    const visibleCbs = Array.from(table.querySelectorAll('tbody tr[data-row]:not([style*="display: none"]) input[type=checkbox]'));
+                    const checkedCbs = visibleCbs.filter(c => c.checked);
+                    headerCb.indeterminate = checkedCbs.length > 0 && checkedCbs.length < visibleCbs.length;
+                    headerCb.checked = visibleCbs.length > 0 && checkedCbs.length === visibleCbs.length;
+                }
+
+                function initTableCheckbox(table) {
+                    const headerCb = table.querySelector('thead input[type=checkbox]');
+                    if (!headerCb) return;
+                    // Select all
+                    headerCb.addEventListener('click', function() {
+                        const visibleRows = table.querySelectorAll('tbody tr[data-row]:not([style*="display: none"])');
+                        const visibleCbs = Array.from(visibleRows).map(r => r.querySelector('input[type=checkbox]')).filter(Boolean);
+                        const allChecked = visibleCbs.every(c => c.checked);
+                        visibleCbs.forEach(c => c.checked = !allChecked);
+                        updateHeaderCheckbox(table);
+                    });
+                    // Individual checkboxes
+                    table.querySelectorAll('tbody input[type=checkbox]').forEach(cb => {
+                        cb.addEventListener('change', () => updateHeaderCheckbox(table));
+                    });
+                    updateHeaderCheckbox(table);
+                }
+
+                // ----------- NAVBAR SEARCH BRIDGE -----------
+                function bridgeNavbarSearch() {
+                    const navbar = document.getElementById('navbar-search');
+                    if (!navbar) return;
+                    // Find page-level search inputs (not file manager one)
+                    const pageSearches = Array.from(document.querySelectorAll('input[data-page-search]'));
+                    if (!pageSearches.length) return;
+                    navbar.addEventListener('input', function() {
+                        pageSearches.forEach(inp => {
+                            inp.value = this.value;
+                            inp.dispatchEvent(new Event('input'));
+                        });
+                    });
+                    navbar.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape') {
+                            this.value = '';
+                            pageSearches.forEach(inp => { inp.value = ''; inp.dispatchEvent(new Event('input')); });
+                        }
+                    });
+                }
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Init all tables on page
+                    document.querySelectorAll('table[data-searchable]').forEach(table => {
+                        initTableCheckbox(table);
+                        const searchId = table.getAttribute('data-searchable');
+                        const input = searchId ? document.getElementById(searchId) : null;
+                        if (input) initTableSearch(input, table);
+                    });
+                    bridgeNavbarSearch();
+                });
+            })();
+
+            // Ctrl+K / Cmd+K global shortcut
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    const input = document.getElementById('navbar-search')
+                        || document.querySelector('input[data-page-search]')
+                        || document.getElementById('fm-search');
+                    if (input) { input.focus(); input.select(); }
+                }
+            });
+            </script>
 
             <!-- Toast Container -->
             <div class="fixed top-4 right-4 z-[80] flex flex-col gap-2 pointer-events-none">

@@ -28,24 +28,27 @@ class AuthController extends Controller
         // 1. Coba login sebagai Student (tabel students) — NIM = password = NIM
         if (Auth::guard('student')->attempt(['nim' => $nim, 'password' => $password], $remember)) {
             $request->session()->regenerate();
-            // Mahasiswa diarahkan ke dashboard mahasiswa
             return redirect()->intended(route('mahasiswa.dashboard'));
         }
 
-        // 2. Coba sebagai User admin via nim
-        if (Auth::guard('web')->attempt(['nim' => $nim, 'password' => $password], $remember)) {
+        // 2. Coba sebagai admin: jika input mengandung '@' gunakan email, atau coba email langsung
+        $emailAttempt = str_contains($nim, '@') ? $nim : null;
+        if ($emailAttempt && Auth::guard('web')->attempt(['email' => $emailAttempt, 'password' => $password], $remember)) {
             $request->session()->regenerate();
             return $this->redirectByRoleWeb();
         }
 
-        // 3. Fallback: coba email untuk admin lama
-        if (str_contains($nim, '@') && Auth::guard('web')->attempt(['email' => $nim, 'password' => $password], $remember)) {
-            $request->session()->regenerate();
-            return $this->redirectByRoleWeb();
+        // 3. Fallback: coba nim sebagai email (nim@polindra.ac.id) untuk admin
+        if (!$emailAttempt) {
+            $emailGuess = strtolower($nim) . '@polindra.ac.id';
+            if (Auth::guard('web')->attempt(['email' => $emailGuess, 'password' => $password], $remember)) {
+                $request->session()->regenerate();
+                return $this->redirectByRoleWeb();
+            }
         }
 
         return back()->withErrors([
-            'nim' => 'NIM atau password salah. Mahasiswa: password = NIM.',
+            'nim' => 'NIM atau password salah. Mahasiswa: gunakan NIM sebagai password.',
         ])->onlyInput('nim');
     }
 

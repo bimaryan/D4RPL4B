@@ -10,7 +10,7 @@
     <div class="flex items-center gap-2">
         <div class="hidden sm:flex items-center gap-2 bg-white border border-[#E8DFD1] rounded-full px-3 py-2">
             <i class="fa-solid fa-magnifying-glass text-[11px] text-[#7A7670]"></i>
-            <input placeholder="Cari NIM / nama..." class="bg-transparent text-[13px] outline-none w-[180px] placeholder:text-[#A8A29E]">
+            <input id="search-students" data-page-search placeholder="Cari NIM / nama..." class="bg-transparent text-[13px] outline-none w-[180px] placeholder:text-[#A8A29E]">
         </div>
         <a href="{{ route('students.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#11100F] text-white text-[13px] font-medium hover:bg-black transition"><i class="fa-solid fa-plus text-[11px]"></i> Tambah</a>
     </div>
@@ -19,7 +19,7 @@
 <div class="bg-white border border-[#E8DFD1] rounded-xl overflow-hidden shadow-sm">
     <div class="flex items-center justify-between px-4 py-3 border-b border-[#E8DFD1] bg-[#FCFBF9]">
         <div class="flex items-center gap-2 text-[12px]">
-            <span class="font-medium">{{ $students->count() }} Mahasiswa</span>
+            <span class="font-medium"><span data-count>{{ $students->count() }}</span> Mahasiswa</span>
             <span class="w-1 h-1 rounded-full bg-[#E8DFD1]"></span>
             <span class="text-[#7A7670]">Urut NIM</span>
         </div>
@@ -29,7 +29,7 @@
     </div>
 
     <div class="overflow-x-auto">
-        <table class="w-full text-left">
+        <table class="w-full text-left" data-searchable="search-students" data-table-wrap>
             <thead class="bg-[#F6F5F1] border-b border-[#E8DFD1] text-[11px] font-semibold tracking-[0.08em] uppercase text-[#7A7670]">
                 <tr>
                     <th class="px-4 py-3 w-8"><input type="checkbox" class="rounded border-[#E8DFD1]"></th>
@@ -41,7 +41,7 @@
             </thead>
             <tbody class="divide-y divide-[#E8DFD1]/60 text-[13px]">
                 @forelse($students as $student)
-                <tr class="hover:bg-[#FCFBF9] group">
+                <tr class="hover:bg-[#FCFBF9] group" data-row>
                     <td class="px-4 py-3"><input type="checkbox" class="rounded border-[#E8DFD1]"></td>
                     <td class="px-3 py-3">
                         <div class="flex items-center gap-3">
@@ -71,7 +71,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="5" class="px-6 py-12 text-center">
+                <tr data-empty><td colspan="5" class="px-6 py-12 text-center">
                     <div class="w-12 h-12 rounded-full bg-[#F6F5F1] border border-[#E8DFD1] flex items-center justify-center mx-auto mb-3"><i class="fa-regular fa-folder-open text-[#7A7670]"></i></div>
                     <div class="text-[13px] font-medium">Belum ada mahasiswa</div>
                     <div class="text-[12px] text-[#7A7670]">Tambah data pertama untuk tampil di landing.</div>
@@ -82,7 +82,7 @@
     </div>
 
     <div class="flex items-center justify-between px-4 py-3 border-t border-[#E8DFD1] bg-[#FCFBF9] text-[12px] text-[#7A7670]">
-        <span>Menampilkan {{ $students->count() }} dari {{ $students->count() }}</span>
+        <span>Menampilkan <span data-count>{{ $students->count() }}</span> dari <span data-total>{{ $students->count() }}</span></span>
         <div class="flex items-center gap-1">
             <button class="px-3 py-1.5 rounded-full border border-[#E8DFD1] bg-white disabled:opacity-50" disabled>Sebelumnya</button>
             <span class="px-3 py-1.5 rounded-full bg-[#11100F] text-white">1</span>

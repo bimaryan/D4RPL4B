@@ -130,7 +130,8 @@ Route::middleware(['auth:student'])->prefix('mahasiswa')->name('mahasiswa.')->gr
             'domain' => 'nullable|string|max:255|unique:hostings,domain,' . $hosting->id . '|regex:/^[a-z0-9\-\.]+$/',
         ]);
         
-        $hosting->domain = $request->input('domain') ?? strtolower($student->nim) . '.d4rpl4b.test';
+        $appHost = parse_url(config('app.url', 'http://d4rpl4b.ryaze.cloud'), PHP_URL_HOST) ?? 'd4rpl4b.ryaze.cloud';
+        $hosting->domain = $request->input('domain') ?? strtolower($student->nim) . '.' . $appHost;
         $hosting->save();
         
         return back()->with('success', 'Domain diupdate.');
