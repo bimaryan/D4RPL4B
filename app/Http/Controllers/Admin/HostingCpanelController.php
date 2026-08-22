@@ -104,18 +104,18 @@ class HostingCpanelController extends Controller
         $dbPass = \Illuminate\Support\Str::random(12);
 
         try {
-            \Illuminate\Support\Facades\DB::statement("CREATE DATABASE IF NOT EXISTS `{$dbName}`");
+            \Illuminate\Support\Facades\DB::connection('mysql_root')->statement("CREATE DATABASE IF NOT EXISTS `{$dbName}`");
             
             // Periksa apakah user sudah ada
-            $userExists = \Illuminate\Support\Facades\DB::select("SELECT User FROM mysql.user WHERE User = ?", [$dbUser]);
+            $userExists = \Illuminate\Support\Facades\DB::connection('mysql_root')->select("SELECT User FROM mysql.user WHERE User = ?", [$dbUser]);
             
             if (empty($userExists)) {
-                \Illuminate\Support\Facades\DB::statement("CREATE USER '{$dbUser}'@'%' IDENTIFIED BY '{$dbPass}'");
-                \Illuminate\Support\Facades\DB::statement("GRANT ALL PRIVILEGES ON `{$dbName}`.* TO '{$dbUser}'@'%'");
-                \Illuminate\Support\Facades\DB::statement("FLUSH PRIVILEGES");
+                \Illuminate\Support\Facades\DB::connection('mysql_root')->statement("CREATE USER '{$dbUser}'@'%' IDENTIFIED BY '{$dbPass}'");
+                \Illuminate\Support\Facades\DB::connection('mysql_root')->statement("GRANT ALL PRIVILEGES ON `{$dbName}`.* TO '{$dbUser}'@'%'");
+                \Illuminate\Support\Facades\DB::connection('mysql_root')->statement("FLUSH PRIVILEGES");
             } else {
                 // Update password jika user sudah ada
-                \Illuminate\Support\Facades\DB::statement("ALTER USER '{$dbUser}'@'%' IDENTIFIED BY '{$dbPass}'");
+                \Illuminate\Support\Facades\DB::connection('mysql_root')->statement("ALTER USER '{$dbUser}'@'%' IDENTIFIED BY '{$dbPass}'");
             }
 
             $hosting->databases()->create([
