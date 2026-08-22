@@ -78,7 +78,7 @@ document.addEventListener('alpine:init', () => {
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
-            <a href="{{ $hosting->url }}" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 h-[36px] px-4 rounded-full bg-emerald-500 text-white text-[12px] font-medium hover:bg-emerald-600"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Buka Site</a>
+            <a href="{{ $hosting->domain_url }}" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 h-[36px] px-4 rounded-full bg-emerald-500 text-white text-[12px] font-medium hover:bg-emerald-600"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Buka Site</a>
             <span class="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-mono bg-white border border-[#E8DFD1] rounded-full px-3 h-[36px]"><span class="w-2 h-2 rounded-full {{ $hosting->status==='active'?'bg-emerald-500':'bg-red-500' }}"></span> {{ $usage['files'] }} files</span>
 
             <!-- Action Bar for selected items -->

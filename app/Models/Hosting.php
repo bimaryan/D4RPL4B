@@ -51,4 +51,13 @@ class Hosting extends Model
         if ($bytes < 1073741824) return round($bytes/1048576,1) . ' MB';
         return round($bytes/1073741824,2) . ' GB';
     }
+    public function databases()
+    {
+        return $this->hasMany(HostingDatabase::class);
+    }
+
+    public function cronJobs()
+    {
+        return $this->hasMany(HostingCronJob::class);
+    }
 }

@@ -65,6 +65,18 @@ Route::middleware(['auth:web', 'admin'])->prefix('admin')->group(function () {
     Route::post('/hostings', [\App\Http\Controllers\HostingController::class, 'store'])->name('hostings.store');
     Route::get('/hostings/{hosting}', [\App\Http\Controllers\HostingController::class, 'show'])->name('hostings.show');
     Route::delete('/hostings/{hosting}', [\App\Http\Controllers\HostingController::class, 'destroy'])->name('hostings.destroy');
+    // Halaman cPanel Khusus
+    Route::get('/hostings/{hosting}/metrics', [\App\Http\Controllers\Admin\HostingCpanelController::class, 'metrics'])->name('hostings.metrics');
+    Route::get('/hostings/{hosting}/backup', [\App\Http\Controllers\Admin\HostingCpanelController::class, 'backup'])->name('hostings.backup');
+    Route::get('/hostings/{hosting}/ssl', [\App\Http\Controllers\Admin\HostingCpanelController::class, 'ssl'])->name('hostings.ssl');
+    Route::get('/hostings/{hosting}/terminal', [\App\Http\Controllers\Admin\HostingCpanelController::class, 'terminal'])->name('hostings.terminal');
+    Route::post('/hostings/{hosting}/terminal/execute', [\App\Http\Controllers\Admin\HostingCpanelController::class, 'terminalExecute'])->name('hostings.terminal.execute');
+    Route::get('/hostings/{hosting}/database', [\App\Http\Controllers\Admin\HostingCpanelController::class, 'database'])->name('hostings.database');
+    Route::post('/hostings/{hosting}/database', [\App\Http\Controllers\Admin\HostingCpanelController::class, 'databaseCreate'])->name('hostings.database.create');
+    Route::get('/hostings/{hosting}/cron', [\App\Http\Controllers\Admin\HostingCpanelController::class, 'cron'])->name('hostings.cron');
+    Route::post('/hostings/{hosting}/cron', [\App\Http\Controllers\Admin\HostingCpanelController::class, 'cronStore'])->name('hostings.cron.store');
+    Route::delete('/hostings/cron/{id}', [\App\Http\Controllers\Admin\HostingCpanelController::class, 'cronDestroy'])->name('hostings.cron.destroy');
+        
     Route::post('/hostings/{hosting}/toggle', [\App\Http\Controllers\HostingController::class, 'toggle'])->name('hostings.toggle');
 
     // Admin can access file manager for ANY hosting
