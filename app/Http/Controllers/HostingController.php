@@ -6,6 +6,7 @@ use App\Models\Student;
 use App\Models\Hosting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Services\CloudflareService;
 
 class HostingController extends Controller
 {
@@ -36,12 +37,25 @@ class HostingController extends Controller
         }
 
         $appHost = parse_url(config('app.url', 'http://d4rpl4b.ryaze.cloud'), PHP_URL_HOST) ?? 'd4rpl4b.ryaze.cloud';
+        // Gunakan format 1 level (nim-d4rpl4b.ryaze.cloud) agar Cloudflare Free SSL berfungsi
+        $defaultDomain = strtolower($student->nim) . '-' . str_replace('.ryaze.cloud', '', $appHost) . '.ryaze.cloud';
+        // Fallback jika tidak menggunakan format di atas, tetap aman
+        if (!str_contains($appHost, 'ryaze.cloud')) {
+            $defaultDomain = strtolower($student->nim) . '.' . $appHost;
+        }
+
         $hosting = Hosting::create([
             'student_id' => $student->id,
-            'domain' => $validated['domain'] ?? strtolower($student->nim) . '.' . $appHost,
+            'domain' => $validated['domain'] ?? $defaultDomain,
             'path' => $path,
             'quota_mb' => $validated['quota_mb'] ?? 500,
         ]);
+
+        // Auto Create DNS Record di Cloudflare
+        if ($hosting->domain) {
+            $cf = new CloudflareService();
+            $cf->createCnameRecord($hosting->domain);
+        }
 
         return redirect()->route('hostings.index')->with('success', "Hosting untuk {$student->name} berhasil dibuat. Path: {$path}");
     }
@@ -59,8 +73,15 @@ class HostingController extends Controller
         if (is_dir($path)) {
             $this->deleteDirectory($path);
         }
+        
+        // Auto Delete DNS Record di Cloudflare
+        if ($hosting->domain) {
+            $cf = new CloudflareService();
+            $cf->deleteCnameRecord($hosting->domain);
+        }
+
         $hosting->delete();
-        return redirect()->route('hostings.index')->with('success', 'Hosting dihapus.');
+        return redirect()->route('hostings.index')->with('success', 'Hosting dihapus dan DNS dibersihkan.');
     }
 
     public function toggle(Hosting $hosting)

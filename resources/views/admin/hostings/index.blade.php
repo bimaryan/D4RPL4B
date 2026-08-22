@@ -123,8 +123,8 @@
                     </div>
                     <div>
                         <label class="text-[12px] font-semibold text-[#11100F] mb-1.5 block">Domain <span class="text-[#7A7670] font-normal">(opsional)</span></label>
-                        <input name="domain" placeholder="nim.{{ parse_url(config('app.url', 'http://d4rpl4b.ryaze.cloud'), PHP_URL_HOST) ?? 'd4rpl4b.ryaze.cloud' }}" class="form-input w-full bg-[#FDF9F3] font-mono text-[13px]">
-                        <div class="text-[11px] text-[#7A7670] mt-1">Kosongkan → auto <span class="font-mono">{{ strtolower('nim') }}.{{ parse_url(config('app.url', 'http://d4rpl4b.ryaze.cloud'), PHP_URL_HOST) ?? 'd4rpl4b.ryaze.cloud' }}</span></div>
+                        <input name="domain" placeholder="nim-{{ str_replace('.ryaze.cloud', '', parse_url(config('app.url', 'http://d4rpl4b.ryaze.cloud'), PHP_URL_HOST) ?? 'd4rpl4b') }}.ryaze.cloud" class="form-input w-full bg-[#FDF9F3] font-mono text-[13px]">
+                        <div class="text-[11px] text-[#7A7670] mt-1">Kosongkan → auto <span class="font-mono">{{ strtolower('nim') }}-{{ str_replace('.ryaze.cloud', '', parse_url(config('app.url', 'http://d4rpl4b.ryaze.cloud'), PHP_URL_HOST) ?? 'd4rpl4b') }}.ryaze.cloud</span></div>
                     </div>
                     <div>
                         <label class="text-[12px] font-semibold text-[#11100F] mb-1.5 block">Quota MB</label>

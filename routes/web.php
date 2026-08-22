@@ -131,10 +131,26 @@ Route::middleware(['auth:student'])->prefix('mahasiswa')->name('mahasiswa.')->gr
         ]);
         
         $appHost = parse_url(config('app.url', 'http://d4rpl4b.ryaze.cloud'), PHP_URL_HOST) ?? 'd4rpl4b.ryaze.cloud';
-        $hosting->domain = $request->input('domain') ?? strtolower($student->nim) . '.' . $appHost;
+        
+        $oldDomain = $hosting->domain;
+        $defaultDomain = strtolower($student->nim) . '-' . str_replace('.ryaze.cloud', '', $appHost) . '.ryaze.cloud';
+        if (!str_contains($appHost, 'ryaze.cloud')) {
+            $defaultDomain = strtolower($student->nim) . '.' . $appHost;
+        }
+
+        $hosting->domain = $request->input('domain') ?? $defaultDomain;
         $hosting->save();
         
-        return back()->with('success', 'Domain diupdate.');
+        // Sinkronisasi dengan Cloudflare DNS
+        $cf = new \App\Services\CloudflareService();
+        if ($oldDomain && $oldDomain !== $hosting->domain) {
+            $cf->deleteCnameRecord($oldDomain);
+        }
+        if ($hosting->domain) {
+            $cf->createCnameRecord($hosting->domain);
+        }
+        
+        return back()->with('success', 'Domain diupdate dan disinkronkan dengan Cloudflare.');
     })->name('hosting.settings.update');
 });
 
