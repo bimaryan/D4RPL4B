@@ -42,14 +42,16 @@
 
         <div class="hidden lg:flex items-center gap-3 shrink-0">
             @if(Route::has('login'))
-              @auth
-                @if(Auth::user()->role==='admin')
+              @if(Auth::guard('web')->check() || Auth::guard('student')->check())
+                @if(Auth::guard('web')->check() && Auth::guard('web')->user()->role === 'admin')
                   <a href="{{ route('admin.dashboard') }}" class="h-[36px] inline-flex items-center gap-1.5 px-4 rounded-full border border-[#E8DFD1] bg-white text-[13px] font-[500] hover:bg-[#F5EFE6] transition">Dashboard</a>
+                @elseif(Auth::guard('student')->check() && Auth::guard('student')->user()->hosting)
+                  <a href="{{ route('mahasiswa.hosting.files') }}" class="h-[36px] inline-flex items-center gap-1.5 px-4 rounded-full border border-[#E8DFD1] bg-white text-[13px] font-[500] hover:bg-[#F5EFE6] transition">File Manager</a>
                 @endif
                 <form method="POST" action="{{ route('logout') }}" class="inline">@csrf<button class="h-[36px] px-4 rounded-full text-[13px] font-[450] text-[#6E6A64] hover:text-[#141210]">Keluar</button></form>
               @else
                 <a href="{{ route('login') }}" class="h-[36px] inline-flex items-center gap-1.5 px-5 rounded-full bg-[#141210] text-white text-[13px] font-[500] tracking-[-0.01em] hover:bg-black transition">Masuk <i class="fa-solid fa-arrow-right text-[10px] opacity-60"></i></a>
-              @endauth
+              @endif
             @endif
         </div>
 
@@ -80,13 +82,17 @@
         </div>
         <div class="p-5 border-t border-[#E8DFD1] bg-white">
             @if(Route::has('login'))
-              @auth
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center justify-center gap-2 h-[44px] rounded-full bg-[#141210] text-white text-[14px] font-[500]"><i class="fa-solid fa-gauge-high text-[12px]"></i> Dashboard</a>
+              @if(Auth::guard('web')->check() || Auth::guard('student')->check())
+                @if(Auth::guard('web')->check() && Auth::guard('web')->user()->role === 'admin')
+                  <a href="{{ route('admin.dashboard') }}" class="flex items-center justify-center gap-2 h-[44px] rounded-full bg-[#141210] text-white text-[14px] font-[500]"><i class="fa-solid fa-gauge-high text-[12px]"></i> Dashboard</a>
+                @elseif(Auth::guard('student')->check() && Auth::guard('student')->user()->hosting)
+                  <a href="{{ route('mahasiswa.hosting.files') }}" class="flex items-center justify-center gap-2 h-[44px] rounded-full bg-[#141210] text-white text-[14px] font-[500]"><i class="fa-solid fa-folder text-[12px]"></i> File Manager</a>
+                @endif
                 <form method="POST" action="{{ route('logout') }}" class="mt-2">@csrf<button class="w-full h-[44px] rounded-full border border-[#E8DFD1] bg-white text-[14px] font-[500]">Keluar</button></form>
               @else
                 <a href="{{ route('login') }}" class="flex items-center justify-center gap-2 h-[44px] rounded-full bg-[#141210] text-white text-[14px] font-[500] hover:bg-black transition">Masuk Portal <i class="fa-solid fa-arrow-right text-[11px] opacity-60"></i></a>
                 <p class="text-center font-mono text-[11px] tracking-[0.02em] text-[#7A7670] mt-2">Polindra · D4 RPL 4B</p>
-              @endauth
+              @endif
             @endif
         </div>
     </div>

@@ -2,7 +2,7 @@
 @section('title', 'Edit Karya')
 @section('breadcrumb', 'Karya / Edit')
 @section('content')
-<div class="max-w-[960px]">
+<div class="w-full">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('projects.index') }}" class="w-9 h-9 rounded-full bg-white border border-[#E8DFD1] flex items-center justify-center"><i class="fa-solid fa-arrow-left text-[12px]"></i></a>
         <div class="flex-1"><h1 class="font-semibold text-[18px] leading-none">Edit Karya</h1><p class="text-[11px] font-mono text-[#7A7670]">Hash: {{ $project->hash_id }}</p></div>

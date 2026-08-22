@@ -7,10 +7,28 @@ use Illuminate\Http\Request;
 
 class HostingServeController extends Controller
 {
+    public function serveSubdomain(Request $request, string $subdomain, string $any = null)
+    {
+        $host = $request->getHost();
+        $hosting = Hosting::where('domain', $host)->first();
+
+        if (!$hosting || $hosting->status !== 'active') {
+            abort(404, 'Hosting tidak ditemukan atau tidak aktif');
+        }
+
+        return $this->serveFiles($request, $hosting, $any);
+    }
+
     public function show(Request $request, string $hash, string $any = null)
     {
         $hosting = $this->resolve($hash);
         if (!$hosting || $hosting->status !== 'active') abort(404, 'Hosting tidak aktif');
+
+        return $this->serveFiles($request, $hosting, $any);
+    }
+
+    private function serveFiles(Request $request, Hosting $hosting, ?string $any)
+    {
 
         $path = $any ?? $request->query('path', '');
         // Normalize
@@ -45,7 +63,7 @@ class HostingServeController extends Controller
         $map = ['html'=>'text/html','htm'=>'text/html','css'=>'text/css','js'=>'application/javascript','mjs'=>'application/javascript','json'=>'application/json','png'=>'image/png','jpg'=>'image/jpeg','jpeg'=>'image/jpeg','webp'=>'image/webp','svg'=>'image/svg+xml','gif'=>'image/gif','ico'=>'image/x-icon','woff'=>'font/woff','woff2'=>'font/woff2','ttf'=>'font/ttf','mp4'=>'video/mp4','pdf'=>'application/pdf'];
         if (isset($map[$ext])) $mime = $map[$ext];
 
-        return response()->file($full, ['Content-Type'=>$mime, 'Cache-Control'=>'public, max-age=3600', 'X-Hosting'=>$hosting->hash_id]);
+        return response()->file($full, ['Content-Type'=>$mime, 'Cache-Control'=>'no-cache, no-store, must-revalidate', 'Pragma'=>'no-cache', 'Expires'=>'0', 'X-Hosting'=>$hosting->hash_id]);
     }
 
     private function resolve(string $hash): ?Hosting

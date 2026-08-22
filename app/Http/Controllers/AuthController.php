@@ -28,12 +28,8 @@ class AuthController extends Controller
         // 1. Coba login sebagai Student (tabel students) — NIM = password = NIM
         if (Auth::guard('student')->attempt(['nim' => $nim, 'password' => $password], $remember)) {
             $request->session()->regenerate();
-            // Mahasiswa diarahkan ke hostingnya atau landing
-            $student = Auth::guard('student')->user();
-            if ($student->hosting) {
-                return redirect()->intended(route('hostings.files', $student->hosting->hash_id));
-            }
-            return redirect()->intended('/');
+            // Mahasiswa diarahkan ke dashboard mahasiswa
+            return redirect()->intended(route('mahasiswa.dashboard'));
         }
 
         // 2. Coba sebagai User admin via nim

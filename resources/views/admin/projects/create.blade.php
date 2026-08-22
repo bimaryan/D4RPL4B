@@ -2,7 +2,7 @@
 @section('title', 'Tambah Karya')
 @section('breadcrumb', 'Karya / Tambah')
 @section('content')
-<div class="max-w-[960px]">
+<div class="w-full">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('projects.index') }}" class="w-9 h-9 rounded-full bg-white border border-[#E8DFD1] flex items-center justify-center"><i class="fa-solid fa-arrow-left text-[12px]"></i></a>
         <div><h1 class="font-semibold text-[18px] leading-none">Tambah Karya</h1><p class="text-[12.5px] text-[#7A7670]">Publish ke showcase landing — upload file, bukan URL.</p></div>

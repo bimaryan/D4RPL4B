@@ -2,7 +2,7 @@
 @section('title', 'Hero Section')
 @section('breadcrumb', 'Hero')
 @section('content')
-<div class="max-w-[960px]">
+<div class="w-full">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('admin.dashboard') }}" class="w-9 h-9 rounded-full bg-white border border-[#E8DFD1] flex items-center justify-center hover:bg-[#F6F5F1]"><i class="fa-solid fa-arrow-left text-[12px]"></i></a>
         <div>

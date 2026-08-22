@@ -2,7 +2,7 @@
 @section('title', 'Tambah Jadwal')
 @section('breadcrumb', 'Jadwal / Tambah')
 @section('content')
-<div class="max-w-[960px]">
+<div class="w-full">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('schedules.index') }}" class="w-9 h-9 rounded-full bg-white border border-[#E8DFD1] flex items-center justify-center hover:bg-[#F6F5F1]"><i class="fa-solid fa-arrow-left text-[12px]"></i></a>
         <div><h1 class="font-semibold text-[18px] leading-none">Tambah Jadwal</h1><p class="text-[12.5px] text-[#7A7670]">Isi jadwal kuliah — urutan kecil tampil atas.</p></div>

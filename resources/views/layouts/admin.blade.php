@@ -53,6 +53,7 @@
                 <div>
                     <div class="px-3 mb-2 text-[11px] font-semibold tracking-[0.12em] uppercase text-white/30">Menu</div>
                     <div class="space-y-1">
+                        @auth('web')
                         <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition {{ request()->routeIs('admin.dashboard') ? 'nav-active' : 'nav-idle' }}">
                             <span class="w-7 h-7 rounded-md flex items-center justify-center text-[13px] {{ request()->routeIs('admin.dashboard') ? 'bg-white text-[#11100F]' : 'bg-white/10' }}"><i class="fa-solid fa-gauge-high"></i></span> Dashboard
                         </a>
@@ -68,12 +69,30 @@
                         <a href="{{ route('galleries.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition {{ request()->routeIs('galleries.*') ? 'nav-active' : 'nav-idle' }}">
                             <span class="w-7 h-7 rounded-md flex items-center justify-center text-[13px] {{ request()->routeIs('galleries.*') ? 'bg-white text-[#11100F]' : 'bg-white/10' }}"><i class="fa-solid fa-images"></i></span> Gallery <span class="ml-auto text-[11px] bg-white/10 px-1.5 py-0.5 rounded font-mono">{{ \App\Models\Gallery::count() }}</span>
                         </a>
+                        <a href="{{ route('hostings.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition {{ request()->routeIs('hostings.*') ? 'nav-active' : 'nav-idle' }}">
+                            <span class="w-7 h-7 rounded-md flex items-center justify-center text-[13px] {{ request()->routeIs('hostings.*') ? 'bg-white text-[#11100F]' : 'bg-white/10' }}"><i class="fa-solid fa-server"></i></span> Hosting cPanel
+                        </a>
                         <a href="{{ route('schedules.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition {{ request()->routeIs('schedules.*') ? 'nav-active' : 'nav-idle' }}">
                             <span class="w-7 h-7 rounded-md flex items-center justify-center text-[13px] {{ request()->routeIs('schedules.*') ? 'bg-white text-[#11100F]' : 'bg-white/10' }}"><i class="fa-regular fa-calendar"></i></span> Jadwal Kuliah <span class="ml-auto text-[11px] bg-white/10 px-1.5 py-0.5 rounded font-mono">{{ \App\Models\Schedule::count() }}</span>
                         </a>
                         <a href="{{ route('hero.edit') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition {{ request()->routeIs('hero.*') ? 'nav-active' : 'nav-idle' }}">
                             <span class="w-7 h-7 rounded-md flex items-center justify-center text-[13px] {{ request()->routeIs('hero.*') ? 'bg-white text-[#11100F]' : 'bg-white/10' }}"><i class="fa-solid fa-panorama"></i></span> Hero Image
                         </a>
+                        @endauth
+
+                        @auth('student')
+                        <a href="{{ route('mahasiswa.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition {{ request()->routeIs('mahasiswa.dashboard') ? 'nav-active' : 'nav-idle' }}">
+                            <span class="w-7 h-7 rounded-md flex items-center justify-center text-[13px] {{ request()->routeIs('mahasiswa.dashboard') ? 'bg-white text-[#11100F]' : 'bg-white/10' }}"><i class="fa-solid fa-gauge-high"></i></span> Dashboard
+                        </a>
+                        @if(Auth::guard('student')->user()->hosting)
+                        <a href="{{ route('mahasiswa.hosting.files') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition {{ request()->routeIs('mahasiswa.hosting.files') ? 'nav-active' : 'nav-idle' }}">
+                            <span class="w-7 h-7 rounded-md flex items-center justify-center text-[13px] {{ request()->routeIs('mahasiswa.hosting.files') ? 'bg-white text-[#11100F]' : 'bg-white/10' }}"><i class="fa-solid fa-folder"></i></span> File Manager
+                        </a>
+                        <a href="{{ route('mahasiswa.hosting.settings') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition {{ request()->routeIs('mahasiswa.hosting.settings') ? 'nav-active' : 'nav-idle' }}">
+                            <span class="w-7 h-7 rounded-md flex items-center justify-center text-[13px] {{ request()->routeIs('mahasiswa.hosting.settings') ? 'bg-white text-[#11100F]' : 'bg-white/10' }}"><i class="fa-solid fa-server"></i></span> Pengaturan Hosting
+                        </a>
+                        @endif
+                        @endauth
                     </div>
                 </div>
 
@@ -92,11 +111,16 @@
 
             <!-- user -->
             <div class="p-4 border-t border-white/10">
+                @php
+                    $currentUser = Auth::guard('web')->user() ?? Auth::guard('student')->user();
+                    $userName = $currentUser ? $currentUser->name : 'Admin';
+                    $userEmail = $currentUser ? (isset($currentUser->email) ? $currentUser->email : $currentUser->nim . '@polindra.ac.id') : 'admin@polindra.ac.id';
+                @endphp
                 <div class="flex items-center gap-3 bg-white/[0.06] border border-white/10 rounded-xl p-3">
-                    <img src="https://api.dicebear.com/7.x/initials/svg?seed=Admin&backgroundColor=11100F" class="w-9 h-9 rounded-full border border-white/10 bg-white" alt="admin">
+                    <img src="https://api.dicebear.com/7.x/initials/svg?seed={{ urlencode($userName) }}&backgroundColor=11100F" class="w-9 h-9 rounded-full border border-white/10 bg-white" alt="avatar">
                     <div class="min-w-0 flex-1">
-                        <div class="text-[13px] font-medium leading-none truncate">{{ Auth::user()->name ?? 'Admin' }}</div>
-                        <div class="text-[11px] text-white/50 truncate">{{ Auth::user()->email ?? 'admin@polindra.ac.id' }}</div>
+                        <div class="text-[13px] font-medium leading-none truncate">{{ $userName }}</div>
+                        <div class="text-[11px] text-white/50 truncate">{{ $userEmail }}</div>
                     </div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
