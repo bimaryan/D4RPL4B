@@ -68,7 +68,7 @@
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex items-center justify-end gap-1.5">
-                                <a href="{{ $h->url }}" target="_blank" class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center hover:bg-emerald-100" title="Buka site"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+                                <a href="{{ $h->domain_url }}" target="_blank" class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center hover:bg-emerald-100" title="Buka site"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
                                 <a href="{{ route('hostings.files', $h->hash_id) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#E8DFD1] text-[12px] font-medium hover:bg-[#F6F5F1]"><i class="fa-solid fa-folder-open text-[10px]"></i> cPanel</a>
                                 <form action="{{ route('hostings.destroy', $h->hash_id) }}" method="POST" onsubmit="return confirmDelete(this, 'Hapus Hosting?', 'Hapus hosting {{ $h->student->name }}? Yakin ingin melanjutkan? Tindakan tidak bisa dibatalkan')">
                                     @csrf @method('DELETE')

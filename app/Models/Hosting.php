@@ -24,7 +24,7 @@ class Hosting extends Model
 
     public function getDomainUrlAttribute(): ?string
     {
-        return $this->domain ? 'https://' . $this->domain : $this->url;
+        return $this->domain ? request()->getScheme() . '://' . $this->domain : $this->url;
     }
 
     public function diskUsage(): array
