@@ -9,10 +9,14 @@ use App\Models\Announcement;
 use App\Models\Gallery;
 use App\Models\Schedule;
 
-// Wildcard Subdomain Routing for Hostings (e.g., nim.d4rpl4b.ryaze.cloud)
+// Wildcard Subdomain Routing for Hostings (e.g., nim.ryaze.cloud)
 $appHost = parse_url(config('app.url', 'http://d4rpl4b.ryaze.cloud'), PHP_URL_HOST) ?? 'd4rpl4b.ryaze.cloud';
-Route::domain('{subdomain}.' . $appHost)->group(function () {
-    Route::get('{any?}', [\App\Http\Controllers\HostingServeController::class, 'serveSubdomain'])->where('any', '.*');
+$baseDomain = str_replace('d4rpl4b.', '', $appHost); // e.g. ryaze.cloud
+
+Route::domain('{subdomain}.' . $baseDomain)
+    ->where(['subdomain' => '^(?!d4rpl4b).*$']) // Jangan match d4rpl4b (app utama)
+    ->group(function () {
+        Route::get('{any?}', [\App\Http\Controllers\HostingServeController::class, 'serveSubdomain'])->where('any', '.*');
 });
 
 // Hosting per Mahasiswa - serve like cPanel (fallback path-based)
@@ -131,12 +135,10 @@ Route::middleware(['auth:student'])->prefix('mahasiswa')->name('mahasiswa.')->gr
         ]);
         
         $appHost = parse_url(config('app.url', 'http://d4rpl4b.ryaze.cloud'), PHP_URL_HOST) ?? 'd4rpl4b.ryaze.cloud';
+        $baseDomain = str_replace('d4rpl4b.', '', $appHost);
         
         $oldDomain = $hosting->domain;
-        $defaultDomain = strtolower($student->nim) . '-' . str_replace('.ryaze.cloud', '', $appHost) . '.ryaze.cloud';
-        if (!str_contains($appHost, 'ryaze.cloud')) {
-            $defaultDomain = strtolower($student->nim) . '.' . $appHost;
-        }
+        $defaultDomain = strtolower($student->nim) . '.' . $baseDomain;
 
         $hosting->domain = $request->input('domain') ?? $defaultDomain;
         $hosting->save();

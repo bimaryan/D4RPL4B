@@ -37,12 +37,8 @@ class HostingController extends Controller
         }
 
         $appHost = parse_url(config('app.url', 'http://d4rpl4b.ryaze.cloud'), PHP_URL_HOST) ?? 'd4rpl4b.ryaze.cloud';
-        // Gunakan format 1 level (nim-d4rpl4b.ryaze.cloud) agar Cloudflare Free SSL berfungsi
-        $defaultDomain = strtolower($student->nim) . '-' . str_replace('.ryaze.cloud', '', $appHost) . '.ryaze.cloud';
-        // Fallback jika tidak menggunakan format di atas, tetap aman
-        if (!str_contains($appHost, 'ryaze.cloud')) {
-            $defaultDomain = strtolower($student->nim) . '.' . $appHost;
-        }
+        $baseDomain = str_replace('d4rpl4b.', '', $appHost);
+        $defaultDomain = strtolower($student->nim) . '.' . $baseDomain;
 
         $hosting = Hosting::create([
             'student_id' => $student->id,
