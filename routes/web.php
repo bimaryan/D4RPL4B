@@ -143,7 +143,16 @@ Route::middleware(['auth:student'])->prefix('mahasiswa')->name('mahasiswa.')->gr
         $hosting->domain = $request->input('domain') ?? $defaultDomain;
         $hosting->save();
         
-        return back()->with('success', 'Domain diupdate.');
+        // Sinkronisasi dengan Cloudflare DNS
+        $cf = new \App\Services\CloudflareService();
+        if ($oldDomain && $oldDomain !== $hosting->domain) {
+            $cf->deleteCnameRecord($oldDomain);
+        }
+        if ($hosting->domain) {
+            $cf->createCnameRecord($hosting->domain);
+        }
+        
+        return back()->with('success', 'Domain diupdate dan disinkronkan dengan Cloudflare.');
     })->name('hosting.settings.update');
 });
 

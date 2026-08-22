@@ -6,6 +6,7 @@ use App\Models\Student;
 use App\Models\Hosting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Services\CloudflareService;
 
 class HostingController extends Controller
 {
@@ -46,6 +47,12 @@ class HostingController extends Controller
             'quota_mb' => $validated['quota_mb'] ?? 500,
         ]);
 
+        // Auto Create DNS Record di Cloudflare
+        if ($hosting->domain) {
+            $cf = new CloudflareService();
+            $cf->createCnameRecord($hosting->domain);
+        }
+
         return redirect()->route('hostings.index')->with('success', "Hosting untuk {$student->name} berhasil dibuat. Path: {$path}");
     }
 
@@ -63,8 +70,14 @@ class HostingController extends Controller
             $this->deleteDirectory($path);
         }
         
+        // Auto Delete DNS Record di Cloudflare
+        if ($hosting->domain) {
+            $cf = new CloudflareService();
+            $cf->deleteCnameRecord($hosting->domain);
+        }
+
         $hosting->delete();
-        return redirect()->route('hostings.index')->with('success', 'Hosting dihapus.');
+        return redirect()->route('hostings.index')->with('success', 'Hosting dihapus dan DNS dibersihkan.');
     }
 
     public function toggle(Hosting $hosting)
