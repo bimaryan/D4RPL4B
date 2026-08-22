@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Student;
 use App\Models\Hosting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
